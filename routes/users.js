@@ -49,7 +49,7 @@ const upload = multer({
  *@URL /api/users/register
  *@ACCESS Public
  */
-router.post("/register", upload.single("profilePicture"), (req, res) => {
+router.post("/register", upload.single("profilePicture"), async (req, res) => {
   let { firstname, lastname, username, email, password } = req.body;
   let newUser = new User({
     firstname,
@@ -59,11 +59,11 @@ router.post("/register", upload.single("profilePicture"), (req, res) => {
     password
   });
   req.file ? (newUser.avatar = req.file.path.split("public").pop()) : null;
-  bcrypt.genSalt(10, (err, salt) => {
-    bcrypt.hash(newUser.password, salt, (err, hash) => {
+  bcrypt.genSalt(10, async (err, salt) => {
+    bcrypt.hash(newUser.password, salt, async (err, hash) => {
       if (err) throw err;
       newUser.password = hash;
-      newUser
+      await newUser
         .save()
         .then(user => {
           return res.json({
@@ -82,9 +82,9 @@ router.post("/register", upload.single("profilePicture"), (req, res) => {
  *@URL /api/users/login
  *@ACCESS Public
  */
-router.post("/login", (req, res) => {
+router.post("/login", async (req, res) => {
   let { username, password } = req.body;
-  User.findOne({
+  await User.findOne({
     username
   })
     .then(async user => {
@@ -137,11 +137,31 @@ router.post("/login", (req, res) => {
  *@METHOD PUT Request
  *@DESC To Edit the userprofile
  *@URL /api/users/edit-profile/:id
+ *@ACCESS Private
  */
 router.put(
-  "/edit-profile/:id",
+  "/edit-profile",
+  passport.authenticate("jwt", {
+    session: false
+  }),
   upload.single("profilePicture"),
-  (req, res) => {}
+  async (req, res) => {
+    let { firstname, lastname, email } = req.body;
+    let user = await User.findById(req.user._id);
+    req.file ? (user.avatar = req.file.path.split("public").pop()) : null;
+    user.firstname = firstname;
+    user.lastname = lastname;
+    user.email = email;
+    await user
+      .save()
+      .then(user => {
+        return res.json({
+          message: "User details updated.",
+          success: true
+        });
+      })
+      .catch(err => errorFunction(err, res));
+  }
 );
 
 /**
@@ -149,38 +169,77 @@ router.put(
  *@DESC To Deactivate the userprofile
  *@URL /api/users/deactivate-profile/:id
  */
-router.get("/deactivate-profile/:id", (req, res) => {});
+router.get(
+  "/deactivate-profile/:id",
+  passport.authenticate("jwt", {
+    session: false
+  }),
+  async (req, res) => {
+    await deactivateAccount(req.user._id).then(user => {
+      user
+        ? res.json({
+            message: `Your account has been successfully deactivated. If you want to activate your account then just login into it with username and current password.`,
+            success: true
+          })
+        : res.json({
+            message: "Unable to deactivate the account please try again later.",
+            success: false
+          });
+    });
+  }
+);
 
 /**
  *@METHOD POST Request
  *@DESC To Deactivate the userprofile verification
  *@URL /api/users/users/deactivate-verification/:id
  */
-router.post("/deactivate-verification/:id", (req, res) => {});
+router.post(
+  "/deactivate-verification/:id",
+  passport.authenticate("jwt", {
+    session: false
+  }),
+  async (req, res) => {
+    let { password } = req.body;
+    let isMatch = await matchPassword(req.user, password);
+    isMatch
+      ? res.json({
+          success: true
+        })
+      : res.json({
+          success: false
+        });
+  }
+);
 
 /**
  *@METHOD GET Request
  *@DESC To get all the users profile by usernames or first-names or last-names
  *@URL /api/users/profile-search
+ *@ACCESS Public
  */
-router.get("/profile-search", (req, res) => {
+router.post("/profile-search", async (req, res) => {
   let { query } = req.body;
-  User.find({
-    $or: [
-      { firstname: { $regex: new RegExp(query), $options: "i" } },
-      { lastname: { $regex: new RegExp(query), $options: "i" } },
-      { username: { $regex: new RegExp(query), $options: "i" } }
-    ]
-  })
-    .then(users => {
-      users.length != 0
-        ? res.json({ users, success: true })
-        : res.json({
-            message: `Unable to find any user with ${query}.`,
-            success: false
-          });
+  if (query.length > 3) {
+    await User.find({
+      $or: [
+        { firstname: { $regex: new RegExp(query), $options: "i" } },
+        { lastname: { $regex: new RegExp(query), $options: "i" } },
+        { username: { $regex: new RegExp(query), $options: "i" } }
+      ]
     })
-    .catch(err => errorFunction(err, res));
+      .then(users => {
+        users.length != 0
+          ? res.json({ users, success: true })
+          : res.json({
+              message: `Unable to find any user with ${query}.`,
+              success: false
+            });
+      })
+      .catch(err => errorFunction(err, res));
+  } else {
+    return res.json({});
+  }
 });
 
 /**
@@ -188,20 +247,26 @@ router.get("/profile-search", (req, res) => {
  *@DESC To get all the users profile by id
  *@URL /api/users/profile/:id
  */
-router.get("/profiles/:id", (req, res) => {
-  User.findOne({ _id: req.params.id })
-    .then(user => {
-      user
-        ? res.json({
-            user,
-            success: true
-          })
-        : res.json({
-            success: false
-          });
-    })
-    .catch(err => errorFunction(err, res));
-});
+router.get(
+  "/profiles/:id",
+  passport.authenticate("jwt", {
+    session: false
+  }),
+  async (req, res) => {
+    await User.findOne({ _id: req.params.id })
+      .then(user => {
+        user
+          ? res.json({
+              user,
+              success: true
+            })
+          : res.json({
+              success: false
+            });
+      })
+      .catch(err => errorFunction(err, res));
+  }
+);
 
 // Extra utility routes
 // Checks for the unique username while registering
@@ -210,7 +275,7 @@ router.post("/validate-username", (req, res) => {
     .then(user => {
       user
         ? res.json({
-            message: "Username is already teken please try another username.",
+            message: "Username is already taken please try another username.",
             success: false
           })
         : res.json({
@@ -245,10 +310,10 @@ const errorFunction = (error, res) => {
   });
 };
 
-const activateDeactivateAccount = id => {
-  User.findById(id).then(user => {
+const deactivateAccount = async id => {
+  await User.findById(id).then(async user => {
     user.activation = !user.activation;
-    user.save().then(user => user);
+    await user.save().then(user => user);
   });
 };
 
