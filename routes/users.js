@@ -2,12 +2,12 @@ const express = require("express");
 const router = express.Router();
 const bcrypt = require("bcryptjs");
 const jwt = require("jsonwebtoken");
-const key = require("../../config/db").secret;
+const key = require("../config/db").secret;
 const passport = require("passport");
 const multer = require("multer");
 
 // Load User Model
-const User = require("../../models/User");
+const User = require("../models/User");
 
 // Multer storage startegy
 const storage = multer.diskStorage({
@@ -46,21 +46,97 @@ const upload = multer({
 /**
  *@METHOD POST Request
  *@DESC To register the user
- *@URL /api/user-register
+ *@URL /api/users/register
+ *@ACCESS Public
  */
-router.get("/user-register", upload.single("profilePicture"), (req, res) => {});
+router.post("/register", upload.single("profilePicture"), (req, res) => {
+  let { firstname, lastname, username, email, password } = req.body;
+  let newUser = new User({
+    firstname,
+    lastname,
+    username,
+    email,
+    password
+  });
+  req.file ? (newUser.avatar = req.file.path.split("public").pop()) : null;
+  bcrypt.genSalt(10, (err, salt) => {
+    bcrypt.hash(newUser.password, salt, (err, hash) => {
+      if (err) throw err;
+      newUser.password = hash;
+      newUser
+        .save()
+        .then(user => {
+          return res.json({
+            message: "User registration is successful",
+            success: true
+          });
+        })
+        .catch(err => errorFunction(err, res));
+    });
+  });
+});
 
 /**
  *@METHOD POST Request
  *@DESC To Authenticate the user
- *@URL /api/user-login
+ *@URL /api/users/login
+ *@ACCESS Public
  */
-router.post("/user-login", (req, res) => {});
+router.post("/login", (req, res) => {
+  let { username, password } = req.body;
+  User.findOne({
+    username
+  })
+    .then(async user => {
+      if (!user) {
+        return res.json({
+          success: false,
+          message: "Username is not found."
+        });
+      }
+      let isMatch = await matchPassword(user, password);
+      // Match the password
+      if (isMatch) {
+        // Set user activation true
+        user.activation = true;
+        user.save();
+        // Now send the auth token back b generating it and sign it
+        // JWT Payload Signing credentials
+        const payload = {
+          _id: user._id,
+          name: user.name,
+          email: user.email,
+          username: user.username,
+          avatar: user.avatar
+        };
+        jwt.sign(
+          payload,
+          key,
+          {
+            expiresIn: 604800
+          },
+          (err, token) => {
+            return res.json({
+              success: true,
+              token: `Bearer ${token}`,
+              message: "You are successfully logged in."
+            });
+          }
+        );
+      } else {
+        return res.json({
+          success: false,
+          message: "Incorrect password."
+        });
+      }
+    })
+    .catch(err => errorFunction(err, res));
+});
 
 /**
  *@METHOD PUT Request
  *@DESC To Edit the userprofile
- *@URL /api/edit-profile/:id
+ *@URL /api/users/edit-profile/:id
  */
 router.put(
   "/edit-profile/:id",
@@ -71,24 +147,24 @@ router.put(
 /**
  *@METHOD GET Request
  *@DESC To Deactivate the userprofile
- *@URL /api/deactivate-profile/:id
+ *@URL /api/users/deactivate-profile/:id
  */
 router.get("/deactivate-profile/:id", (req, res) => {});
 
 /**
  *@METHOD POST Request
  *@DESC To Deactivate the userprofile verification
- *@URL /api/deactivate-verification/:id
+ *@URL /api/users/users/deactivate-verification/:id
  */
 router.post("/deactivate-verification/:id", (req, res) => {});
 
 /**
  *@METHOD GET Request
  *@DESC To get all the users profile by usernames or first-names or last-names
- *@URL /api/profile-search
+ *@URL /api/users/profile-search
  */
 router.get("/profile-search", (req, res) => {
-  let query = req.body.query;
+  let { query } = req.body;
   User.find({
     $or: [
       { firstname: { $regex: new RegExp(query), $options: "i" } },
@@ -104,13 +180,13 @@ router.get("/profile-search", (req, res) => {
             success: false
           });
     })
-    .catch(err => errorFunction(err));
+    .catch(err => errorFunction(err, res));
 });
 
 /**
  *@METHOD GET Request
  *@DESC To get all the users profile by id
- *@URL /api/profile/:id
+ *@URL /api/users/profile/:id
  */
 router.get("/profiles/:id", (req, res) => {
   User.findOne({ _id: req.params.id })
@@ -124,7 +200,7 @@ router.get("/profiles/:id", (req, res) => {
             success: false
           });
     })
-    .catch(err => errorFunction(err));
+    .catch(err => errorFunction(err, res));
 });
 
 // Extra utility routes
@@ -141,7 +217,7 @@ router.post("/validate-username", (req, res) => {
             success: true
           });
     })
-    .catch(err => errorFunction(err));
+    .catch(err => errorFunction(err, res));
 });
 
 // Checks for the unique email while registering
@@ -158,15 +234,26 @@ router.post("/validate-email", (req, res) => {
             success: true
           });
     })
-    .catch(err => errorFunction(err));
+    .catch(err => errorFunction(err, res));
 });
 
 // Utility function to handle the errors
-const errorFunction = error => {
+const errorFunction = (error, res) => {
   return res.json({
     message: `Server is currently unable to handle this request please try in a moment.`,
     success: false
   });
+};
+
+const activateDeactivateAccount = id => {
+  User.findById(id).then(user => {
+    user.activation = !user.activation;
+    user.save().then(user => user);
+  });
+};
+
+const matchPassword = async (user, password) => {
+  return await bcrypt.compare(password, user.password);
 };
 
 module.exports = router;

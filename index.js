@@ -14,6 +14,11 @@ app.use(cors());
 
 // BodyParser Middleware
 app.use(bodyParser.json());
+app.use(
+  bodyParser.urlencoded({
+    extended: false
+  })
+);
 
 // Passport
 app.use(passport.initialize());
@@ -36,6 +41,10 @@ mongoose
 
 // Set the static folder
 app.use(express.static(path.join(__dirname, "public")));
+
+// User Routes
+const users = require("./routes/users");
+app.use("/api/users", users);
 
 app.listen(PORT, () => {
   console.log(`Server started on port ${PORT}`);
