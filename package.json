@@ -1,0 +1,11 @@
+{
+  "name": "mean_auth",
+  "version": "1.0.0",
+  "description": "Simple mean authentication application with Node Express and Angular",
+  "main": "index.js",
+  "scripts": {
+    "test": "echo \"Error: no test specified\" && exit 1"
+  },
+  "author": "Narendra maurya",
+  "license": "MIT"
+}
