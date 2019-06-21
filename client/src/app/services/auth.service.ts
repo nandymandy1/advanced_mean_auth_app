@@ -7,7 +7,7 @@ import { BehaviorSubject } from "rxjs";
   providedIn: "root"
 })
 export class AuthService {
-  /**
+  /*
    * To Detect the change in Authenticated service varibale Which will be set Initially false
    * And once the use is logged in then it will change the its value to true and on the change
    * of this varibale we can trigger to any event  in that component while subscribing it.
