@@ -1,0 +1,17 @@
+<div class="navbar-fixed">
+  <nav>
+    <div class="nav-wrapper blue darken-4">
+      <a [routerLink]="['/']" class="brand-logo">&nbsp;MEAN Auth App</a>
+      <ul id="nav-mobile" class="right hide-on-med-and-down">
+        <li [routerLinkActive]="['active']" [routerLinkActiveOptions]="{exact:true}"><a class="nav-link"
+            [routerLink]="['/']">Home</a></li>
+        <li *ngIf="authService.authenticated" [routerLinkActive]="['active']" [routerLinkActiveOptions]="{exact:true}">
+          <a class="nav-link" [routerLink]="['/dashboard']">Dashboard</a></li>
+        <li *ngIf="!authService.authenticated" [routerLinkActive]="['active']" [routerLinkActiveOptions]="{exact:true}">
+          <a class="nav-link" [routerLink]="['/login']">Login</a></li>
+        <li *ngIf="!authService.authenticated" [routerLinkActive]="['active']" [routerLinkActiveOptions]="{exact:true}">
+          <a class="nav-link" [routerLink]="['/register']">Register</a></li>
+      </ul>
+    </div>
+  </nav>
+</div>
