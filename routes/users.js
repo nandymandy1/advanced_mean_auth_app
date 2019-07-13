@@ -22,18 +22,6 @@ const storage = multer.diskStorage({
   }
 });
 
-// // File types
-// const fileFilter = (req, file, cb) => {
-//   cb(null, false);
-//   if (file.mimetype == 'image/jpeg' || file.mimetype == 'image/png' || file.mimetype == 'image/jpg') {
-//       // then store the file
-//       cb(null, true);
-//   } else {
-//       // reject the file
-//       cb(null, false);
-//   }
-// };
-
 // Multer Configuration
 const upload = multer({
   storage: storage
