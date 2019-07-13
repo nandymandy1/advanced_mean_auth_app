@@ -35,6 +35,7 @@ const upload = multer({
  */
 router.post("/register", upload.single("profilePicture"), async (req, res) => {
   let { firstname, lastname, username, email, password } = req.body;
+
   let newUser = new User({
     firstname,
     lastname,
@@ -44,6 +45,7 @@ router.post("/register", upload.single("profilePicture"), async (req, res) => {
   });
 
   req.file ? (newUser.avatar = req.file.path.split("public").pop()) : null;
+
   bcrypt.genSalt(10, async (err, salt) => {
     bcrypt.hash(newUser.password, salt, async (err, hash) => {
       if (err) throw err;
