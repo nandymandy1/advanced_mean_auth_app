@@ -1,29 +1,32 @@
 import { BrowserModule } from "@angular/platform-browser";
 import { NgModule } from "@angular/core";
-import { HttpClientModule } from "@angular/common/http";
 import { FormsModule } from "@angular/forms";
+import { HttpClientModule } from "@angular/common/http";
 
 import { AppRoutingModule } from "./app-routing.module";
 import { AppComponent } from "./app.component";
 import { NavbarComponent } from "./components/layout/navbar/navbar.component";
-import { RegisterComponent } from "./components/public/register/register.component";
-import { LoginComponent } from "./components/public/login/login.component";
-import { HomeComponent } from "./components/public/home/home.component";
-import { DashboardComponent } from "./components/auth/dashboard/dashboard.component";
+import { HomeComponent } from "./components/layout/home/home.component";
+import { LoginComponent } from "./components/auth/login/login.component";
+import { RegisterComponent } from "./components/auth/register/register.component";
+import { ProfileComponent } from "./components/auth/profile/profile.component";
+import { ProfileSearchComponent } from "./components/common/profile-search/profile-search.component";
+
+import { ApiCallsService } from "./services/api-calls.service";
 import { AuthService } from "./services/auth.service";
-import { NetworkService } from "./services/network.service";
 
 @NgModule({
   declarations: [
     AppComponent,
     NavbarComponent,
-    RegisterComponent,
-    LoginComponent,
     HomeComponent,
-    DashboardComponent
+    LoginComponent,
+    RegisterComponent,
+    ProfileComponent,
+    ProfileSearchComponent
   ],
-  imports: [BrowserModule, AppRoutingModule, HttpClientModule, FormsModule],
-  providers: [AuthService, NetworkService],
+  imports: [BrowserModule, AppRoutingModule, FormsModule, HttpClientModule],
+  providers: [ApiCallsService, AuthService],
   bootstrap: [AppComponent]
 })
 export class AppModule {}

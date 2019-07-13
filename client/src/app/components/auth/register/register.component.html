@@ -1,0 +1,81 @@
+<div class="row my-3" style="margin-top:5rem;">
+  <div class="col-lg-7 col-md-8 col-sm-12 card mx-auto p-4 mt-4">
+    <form (submit)="register()">
+      <div class="row">
+        <div class="col-8">
+          <h1 class="h1-responsive">Register</h1>
+        </div>
+        <div class="col-4">
+          <div class="file-field">
+            <img height="150"
+              [src]="userImage ? imageURL : 'https://34yigttpdc638c2g11fbif92-wpengine.netdna-ssl.com/wp-content/uploads/2016/09/default-user-img.jpg'"
+              class="rounded-circle z-depth-1-half avatar-pic" alt="User Image Avatar">
+            <button type="button" class="btn btn-default btn-sm red darken-1 mt-2">
+              <span style="position: absolute; margin-left: 1.5rem;">Add Image</span>
+              <input type="file" name="imageFile" (change)="onImageSelected($event)"
+                style="opacity: 0; margin-left: 2rem; width: 4rem; background-color: #fff;">
+            </button>
+          </div>
+        </div>
+      </div>
+      <div class="md-form">
+        <label for="firstname">Firstname</label>
+        <input type="text" id="firstname" name="firstname" [(ngModel)]="firstname"
+          [class]="err.firstname ? 'form-control is-invalid' : (!err.firstname && firstname !== '') ? 'form-control is-valid' : 'form-control'">
+        <div class="invalid-feedback" *ngIf="err.firstname">
+          {{ err.firstname }}
+        </div>
+      </div>
+      <div class="md-form">
+        <label for="lastname">Lastname</label>
+        <input type="text" id="lastname" name="lastname" class="form-control" [(ngModel)]="lastname"
+          [class]="err.lastname ? 'form-control is-invalid' : (!err.lastname && lastname !== '') ? 'form-control is-valid' : 'form-control'">
+        <div class="invalid-feedback" *ngIf="err.lastname">
+          {{ err.lastname }}
+        </div>
+      </div>
+      <div class="md-form">
+        <label for="username">Username</label>
+        <input type="text" id="username" name="username" class="form-control" [(ngModel)]="username"
+          [class]="(username == '' && !err.username) ? 'form-control' : (username !== '' && err.username) ? 'form-control is-invalid' : (username !== '' && !err.username) ? 'form-control is-valid' : 'form-control'"
+          (focusout)="validateUsername($event)">
+        <div class="invalid-feedback" *ngIf="err.username">
+          {{ err.username }}
+        </div>
+      </div>
+      <div class="md-form">
+        <label for="email">Email</label>
+        <input type="email" id="email" name="email" class="form-control"
+          [class]="(email == '' && !err.email) ? 'form-control' : (email !== '' && err.email) ? 'form-control is-invalid' : (email !== '' && !err.email) ? 'form-control is-valid' : 'form-control'"
+          [(ngModel)]="email" (focusout)="validateEmail($event)">
+        <div class="invalid-feedback" *ngIf="err.email">
+          {{ err.email }}
+        </div>
+      </div>
+      <div class="md-form">
+        <label for="password">Password</label>
+        <input type="password" id="password" name="password" class="form-control" [(ngModel)]="password"
+          [class]="(password == '' && !err.password) ? 'form-control' : (password !== '' && err.password) ? 'form-control is-invalid' : (password !== '' && !err.password) ? 'form-control is-valid' : 'form-control'"
+          (focusout)="validatePassword($event)">
+        <div class="invalid-feedback" *ngIf="err.password">
+          {{ err.password }}
+        </div>
+      </div>
+      <div class="md-form">
+        <label for="confirmPassword">Confirm Password</label>
+        <input type="password" id="confirmPassword" name="confirmPassword" class="form-control"
+          [class]="(confirmPassword == '' && !err.confirmPassword) ? 'form-control' : (confirmPassword !== '' && err.confirmPassword) ? 'form-control is-invalid' : (confirmPassword !== '' && !err.confirmPassword) ? 'form-control is-valid' : 'form-control'"
+          [(ngModel)]="confirmPassword" (focusout)="validateConfirmPassword($event)">
+        <div class="invalid-feedback" *ngIf="err.confirmPassword">
+          {{ err.confirmPassword }}
+        </div>
+      </div>
+      <button class="btn red darken-2 text-white btn-block my-4" type="submit">Register</button>
+      <div class="row">
+        <p class="mx-auto">Already have an Account?
+          <a [routerLink]="['/login']"> Login Now</a>
+        </p>
+      </div>
+    </form>
+  </div>
+</div>

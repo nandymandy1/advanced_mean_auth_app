@@ -58,6 +58,7 @@ router.post("/register", upload.single("profilePicture"), async (req, res) => {
     email,
     password
   });
+
   req.file ? (newUser.avatar = req.file.path.split("public").pop()) : null;
   bcrypt.genSalt(10, async (err, salt) => {
     bcrypt.hash(newUser.password, salt, async (err, hash) => {
@@ -102,7 +103,7 @@ router.post("/login", async (req, res) => {
         user.save();
         // Now send the auth token back b generating it and sign it
         // JWT Payload Signing credentials
-        const payload = {
+        let payload = {
           _id: user._id,
           name: user.name,
           email: user.email,
@@ -270,8 +271,8 @@ router.get(
 
 // Extra utility routes
 // Checks for the unique username while registering
-router.post("/validate-username", (req, res) => {
-  User.findOne({ username: req.body.username })
+router.get("/validate-username", async (req, res) => {
+  await User.findOne({ username: req.query.username })
     .then(user => {
       user
         ? res.json({
@@ -286,8 +287,8 @@ router.post("/validate-username", (req, res) => {
 });
 
 // Checks for the unique email while registering
-router.post("/validate-email", (req, res) => {
-  User.findOne({ email: req.body.email })
+router.get("/validate-email", async (req, res) => {
+  await User.findOne({ email: req.query.email })
     .then(user => {
       user
         ? res.json({
@@ -302,14 +303,20 @@ router.post("/validate-email", (req, res) => {
     .catch(err => errorFunction(err, res));
 });
 
-// Utility function to handle the errors
+/*
+ * Utility function to handle the errors
+ */
 const errorFunction = (error, res) => {
+  console.log(error);
   return res.json({
     message: `Server is currently unable to handle this request please try in a moment.`,
     success: false
   });
 };
 
+/**
+ * Activate or Deactivate Account
+ */
 const deactivateAccount = async id => {
   await User.findById(id).then(async user => {
     user.activation = !user.activation;
@@ -317,6 +324,9 @@ const deactivateAccount = async id => {
   });
 };
 
+/**
+ * Match Password Function
+ */
 const matchPassword = async (user, password) => {
   return await bcrypt.compare(password, user.password);
 };

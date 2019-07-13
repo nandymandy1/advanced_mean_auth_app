@@ -4,7 +4,8 @@
   "description": "Simple mean authentication application with Node Express and Angular",
   "main": "index.js",
   "scripts": {
-    "test": "echo \"Error: no test specified\" && exit 1"
+    "test": "echo \"Error: no test specified\" && exit 1",
+    "start": "node"
   },
   "author": "Narendra maurya",
   "license": "MIT",

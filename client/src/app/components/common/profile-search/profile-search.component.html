@@ -1,0 +1,49 @@
+<div class="row">
+  <div class="col-lg-7 col-md-6 col-sm-12 col-xs-12 card pl-3 pr-3 pb-3">
+    <!-- Search form -->
+    <div class="input-group md-form form-sm form-2 pl-0">
+      <input class="form-control my-0 py-1 red-border" type="text" placeholder="Search" aria-label="Search">
+      <div class="input-group-append">
+        <span class="input-group-text red darken-1" id="basic-text1"><i class="fas fa-search text-white"
+            aria-hidden="true"></i></span>
+      </div>
+    </div>
+    <!-- Search form -->
+    <!--User List-->
+    <div class="list-group-flush mt-3">
+      <div class="list-group-item" *ngFor="let user of users">
+        <div class="row">
+          <div class="col-3">
+            <img src="https://timberlandcampgroundnh.com/images/users/user-ashley-mason-270x270.jpg"
+              class="img-fluid rounded-circle" style="height: 6rem; width: 6rem;" alt="">
+          </div>
+          <div class="col-9">
+            <h3 class="h3-responsive">Username</h3>
+            <h4 class="h4-responsive">Firstname Lastname</h4>
+            <h5 class="h5-responsive">Email</h5>
+          </div>
+        </div>
+      </div>
+    </div>
+    <!--User List-->
+  </div>
+  <div class="col-lg-5 col-md-6 col-sm-12 col-xs-12">
+    <div class="card mx-auto" style="width: 20rem;">
+      <div class="view overlay">
+        <img class="card-img-top" src="https://timberlandcampgroundnh.com/images/users/user-ashley-mason-270x270.jpg"
+          alt="Card image cap">
+        <a href="#!">
+          <div class="mask rgba-white-slight"></div>
+        </a>
+      </div>
+      <!-- Card content -->
+      <div class="card-body">
+        <h4 class="card-title">Firstname Lastname</h4>
+        <h5 class="card-title">Username</h5>
+        <p class="card-text">email</p>
+        <a href="#" class="btn btn-primary red darken-1 btn-sm">View Profile</a>
+      </div>
+    </div>
+    <!-- Card -->
+  </div>
+</div>
