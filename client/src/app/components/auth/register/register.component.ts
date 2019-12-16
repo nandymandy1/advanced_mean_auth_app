@@ -16,42 +16,51 @@ export class RegisterComponent implements OnInit {
   password: string = "";
   confirmPassword: string = "";
 
-  err: any = {};
+  err: any = {
+    topWarning: "",
+    username: "",
+    email: "",
+    firstname: "",
+    lastname: "",
+    password: "",
+    confirmPassword: ""
+  };
 
   constructor(private auth: AuthService) {}
   ngOnInit() {}
 
   register = () => {
-    // this.err = {};
-    // if (this.credentialsNotEmpty()) {
-    //   let data = {
-    //     username: this.username,
-    //     password: this.password,
-    //     firstname: this.firstname,
-    //     lastname: this.lastname,
-    //     email: this.email
-    //   };
-    // }
+    if (this.credentialsNotEmpty()) {
+      let data = {
+        username: this.username,
+        password: this.password,
+        firstname: this.firstname,
+        lastname: this.lastname,
+        email: this.email
+      };
+      console.log(data);
+    } else {
+      this.err.topWarning = "Please fill in all the credentials.";
+    }
   };
 
   credentialsNotEmpty = () => {
-    // this.firstname == ""
-    //   ? (this.err["firstname"] = "First Name cannot be empty.")
-    //   : delete this.err["firstname"];
-    // this.lastname == ""
-    //   ? (this.err["lastname"] = "Last Name cannot be empty.")
-    //   : delete this.err["lastname"];
-    // this.email == "" ? (this.err["email"] = "Email cannot be empty.") : null;
-    // this.password == ""
-    //   ? (this.err["password"] = "Password cannot be empty.")
-    //   : delete this.err["password"];
-    // this.username == ""
-    //   ? (this.err["username"] = "Username cannot be empty.")
-    //   : delete this.err["username"];
-    // return this.err == {} ? true : false;
+    if (
+      this.username == "" ||
+      this.password == "" ||
+      this.confirmPassword ||
+      this.email == "" ||
+      this.username == "" ||
+      this.firstname == "" ||
+      this.lastname == ""
+    ) {
+      return false;
+    } else {
+      return true;
+    }
   };
 
-  onImageSelected = e => {
+  onImageSelected = (e: any) => {
     this.userImage = e.target.files[0];
     let reader = new FileReader();
     reader.readAsDataURL(e.target.files[0]);
@@ -60,52 +69,91 @@ export class RegisterComponent implements OnInit {
     };
   };
 
-  validatePassword = e => {
-    let password = e.target.value;
-    let pwdRegEx = /^(?=.*[0-9])(?=.*[!@#$%^&*])[a-zA-Z0-9!@#$%^&*]{6,16}$/;
-    !pwdRegEx.test(String(password).toLowerCase())
-      ? (this.err["password"] =
-          "Password must contain atleast one capital letter, atleast one special character and atleast one number.")
-      : delete this.err["password"];
-  };
+  // validateFirstName = (e: any) => {
+  //   let firstname: string = e.target.value;
+  //   if (firstname.length == 0) {
+  //     this.err.firstname = "First Name is required.";
+  //   } else {
+  //     this.err.firstname = "";
+  //   }
+  // };
 
-  validateConfirmPassword = e => {
-    let confirmPassword = e.target.value;
-    this.password !== confirmPassword
-      ? (this.err["confirmPassword"] = "Password do not match.")
-      : delete this.err["confirmPassword"];
-  };
+  // validateLastName = (e: any) => {
+  //   if (this.lastname.length == 0) {
+  //     this.err.lastname = "Last Name is required.";
+  //   } else {
+  //     this.err.lastname = "";
+  //   }
+  // };
 
-  validateUsername = async e => {
-    let username = e.target.value;
-    if (username.length > 4) {
-      let response = await this.auth.usernameValidation(username);
-      response.subscribe((res: any) => {
-        !res.success
-          ? (this.err["username"] = res.message)
-          : delete this.err["username"];
-      });
-    }
-  };
+  // validatePassword = (e: any) => {
+  //   if (this.password.length == 0) {
+  //     this.err.password = "Password field is required.";
+  //   } else if (this.password.length > 0) {
+  //     let pwdRegEx = /^(?=.*[0-9])(?=.*[!@#$%^&*])[a-zA-Z0-9!@#$%^&*]{6,16}$/;
+  //     if (!pwdRegEx.test(String(this.password).toLowerCase())) {
+  //       this.err.password =
+  //         "Password must contain atleast one capital letter, atleast one special character and atleast one number.";
+  //     } else {
+  //       this.err.password = "";
+  //     }
+  //   } else {
+  //     this.err.password = "Password field is required.";
+  //   }
+  // };
 
-  validateEmail = async e => {
-    let email = e.target.value;
-    if (this.validEmailExp(email)) {
-      let response = await this.auth.emailValidation(email);
-      response.subscribe((res: any) => {
-        !res.success
-          ? (this.err["email"] = res.message)
-          : delete this.err["email"];
-      });
-    }
-  };
+  // validateConfirmPassword = e => {
+  //   let confirmPassword = e.target.value;
+  //   if (confirmPassword.length != 0) {
+  //     if (this.password !== confirmPassword) {
+  //       this.err.confirmPassword = "Passwords do not match.";
+  //     } else {
+  //       this.err.confirmPassword = "";
+  //     }
+  //   } else {
+  //     this.err.confirmPassword = "Confirm Password is required.";
+  //   }
+  // };
 
-  validEmailExp = email => {
-    let regx = /^(([^<>()\[\]\\.,;:\s@"]+(\.[^<>()\[\]\\.,;:\s@"]+)*)|(".+"))@((\[[0-9]{1,3}\.[0-9]{1,3}\.[0-9]{1,3}\.[0-9]{1,3}\])|(([a-zA-Z\-0-9]+\.)+[a-zA-Z]{2,}))$/;
-    let match = regx.test(String(email).toLowerCase());
-    match
-      ? delete this.err["email"]
-      : (this.err["email"] = "Please enter a valid email.");
-    return match;
-  };
+  // validateUsername = async (e: any) => {
+  //   let username: string = e.target.value;
+  //   if (username.length == 0) {
+  //     this.err.username = "Username field is required.";
+  //   } else if (username.length >= 6) {
+  //     let response = await this.auth.usernameValidation(username);
+  //     response.subscribe((res: any) => {
+  //       if (!res.success) {
+  //         this.err.username = res.message;
+  //       } else {
+  //         this.err.username = "";
+  //       }
+  //     });
+  //   } else {
+  //     this.err.username = "Username Should be of atleast 6 characters";
+  //   }
+  // };
+
+  // validateEmail = async (e: any) => {
+  //   let email: string = e.target.value;
+  //   if (email.length == 0) {
+  //     this.err.email = "Email field is required.";
+  //   } else if (this.validEmailExp(email)) {
+  //     let response = await this.auth.emailValidation(email);
+  //     response.subscribe((res: any) => {
+  //       if (!res.success) {
+  //         this.err.email = res.message;
+  //       } else {
+  //         this.err.email = "";
+  //       }
+  //     });
+  //   } else {
+  //     this.err.email = "Please enter a valid email.";
+  //   }
+  // };
+
+  // validEmailExp = (email: string) => {
+  //   let regx = /^(([^<>()\[\]\\.,;:\s@"]+(\.[^<>()\[\]\\.,;:\s@"]+)*)|(".+"))@((\[[0-9]{1,3}\.[0-9]{1,3}\.[0-9]{1,3}\.[0-9]{1,3}\])|(([a-zA-Z\-0-9]+\.)+[a-zA-Z]{2,}))$/;
+  //   let match = regx.test(String(email).toLowerCase());
+  //   return match;
+  // };
 }
